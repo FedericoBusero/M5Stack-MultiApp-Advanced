@@ -1,13 +1,14 @@
 #pragma once
 #include "M5StackMod.h"
 
-class Mp3PlayerClass
+class AudioPlayerClass
 {
   public:
-    Mp3PlayerClass();
-    ~Mp3PlayerClass();
+    AudioPlayerClass();
+    ~AudioPlayerClass();
 
-    void Play(String *fileName);
+    // fileType: 1 = MP3, 2 = WAV, 3 = AAC/M4A, 4 = FLAC
+    void Play(String *fileName, int fileType);
 
   private:
     unsigned long currentMillis;
@@ -33,7 +34,7 @@ class Mp3PlayerClass
     void genSpectrum();
     void drawTimeline();
 
-    AudioGeneratorMP3 *mp3;
+    AudioGenerator *sndStream;
     AudioFileSourceSD *file;
     AudioOutputI2S *out;
 };

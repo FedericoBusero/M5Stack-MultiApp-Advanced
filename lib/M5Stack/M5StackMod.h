@@ -16,6 +16,7 @@
  * <pre>
  * `<Author>`         `<Time>`        `<Version>`        `<Descr>`
  * Zibin Zheng         2017/07/14        0.0.1          Rebuild the new.
+ * baud                2022/10/07        0.0.2          Pulling in support for more audio formats
  * </pre>
  *
  */
@@ -41,6 +42,9 @@
 #include "AudioFileSourceSD.h"
 #include "AudioFileSourceICYStream.h"
 #include "AudioFileSourceBuffer.h"
+#include "AudioGeneratorWAV.h"
+#include "AudioGeneratorAAC.h"
+#include "AudioGeneratorFLAC.h"
 #include "AudioGeneratorMP3.h"
 #include "AudioOutputI2S.h"
 /*

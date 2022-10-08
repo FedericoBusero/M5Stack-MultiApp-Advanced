@@ -1,19 +1,19 @@
-#include "Mp3Player.h"
+#include "AudioPlayer.h"
 
-void Mp3PlayerClass::getvolume()
+void AudioPlayerClass::getvolume()
 {
     preferences.begin("Volume", false);
     M5m.vol = preferences.getFloat("vol", 15.0f);
     preferences.end();
 }
 
-void Mp3PlayerClass::setVolume(int *v)
+void AudioPlayerClass::setVolume(int *v)
 {
     float volume = *v / 71.4f; // volme max value can be 3.99
     out->SetGain(volume);
 }
 
-void Mp3PlayerClass::drawSpectrum(int a, int b, int c, int d, int e, int f, int g)
+void AudioPlayerClass::drawSpectrum(int a, int b, int c, int d, int e, int f, int g)
 {
     aH = ((a * height) / 100);
     aY = ys + (height - aH);
@@ -57,7 +57,7 @@ void Mp3PlayerClass::drawSpectrum(int a, int b, int c, int d, int e, int f, int 
     M5m.Lcd.fillRect(gX, gY, widthS, gH, TFT_LIGHTGREY); //0x051d
 }
 
-void Mp3PlayerClass::genSpectrum()
+void AudioPlayerClass::genSpectrum()
 {
     currentMillis = millis();
     if (currentMillis - genSpectrum_previousMillis > 100)
@@ -67,7 +67,7 @@ void Mp3PlayerClass::genSpectrum()
     }
 }
 
-void Mp3PlayerClass::drawTimeline()
+void AudioPlayerClass::drawTimeline()
 {
     currentMillis = millis();
     if (currentMillis - drawTimeline_previousMillis > 250)
@@ -90,7 +90,7 @@ void Mp3PlayerClass::drawTimeline()
     }
 }
 
-void Mp3PlayerClass::Play(String *fileName)
+void AudioPlayerClass::Play(String *fileName, int fileType)
 {
     M5m.windowClr();
     M5m.Lcd.setTextColor(TFT_CYAN);
@@ -100,9 +100,26 @@ void Mp3PlayerClass::Play(String *fileName)
     file = new AudioFileSourceSD((*fileName).c_str());
     // out = new AudioOutputI2S(0, 1);
     out = new AudioOutputI2S(0, 1, 32);
-    mp3 = new AudioGeneratorMP3();
+
+    if (fileType == 1) // MP3
+    {
+        sndStream = new AudioGeneratorMP3();
+    }
+    else if (fileType == 2) // WAV
+    {
+        sndStream = new AudioGeneratorWAV();
+    }
+    else if (fileType == 3) // AAC
+    {
+        sndStream = new AudioGeneratorAAC();
+    }
+    else if (fileType == 4) // FLAC
+    {
+        sndStream = new AudioGeneratorFLAC();
+    }
+    
     out->SetChannels(2);
-    mp3->begin(file, out);
+    sndStream->begin(file, out);
     setVolume(&M5m.vol);
     M5m.old_vol = M5m.vol;
     M5m.Lcd.setTextColor(TFT_ORANGE);
@@ -111,11 +128,11 @@ void Mp3PlayerClass::Play(String *fileName)
 
     while (!M5m.BtnB.wasPressed())
     {
-        if (mp3->isRunning())
+        if (sndStream->isRunning())
         {
-            if (!mp3->loop())
+            if (!sndStream->loop())
             {
-                mp3->stop();
+                sndStream->stop();
                 break;
             }
             genSpectrum();
@@ -144,13 +161,13 @@ void Mp3PlayerClass::Play(String *fileName)
     preferences.begin("Volume", false);
     preferences.putFloat("vol", M5m.vol);
     preferences.end();
-    mp3->stop();
+    sndStream->stop();
     out->stop();
     file->close();
-    delete mp3;
+    delete sndStream;
     delete out;
     delete file;
-    mp3 = NULL;
+    sndStream = NULL;
     out = NULL;
     file = NULL;
     dacWrite(25, 0);
@@ -158,13 +175,13 @@ void Mp3PlayerClass::Play(String *fileName)
     M5m.windowClr();
 }
 
-Mp3PlayerClass::Mp3PlayerClass()
+AudioPlayerClass::AudioPlayerClass()
 {
     M5m.update();
-    M5m.drawAppMenu(F("Mp3Player"), F("VOL-"), F("EXIT"), F("VOL+"));
+    M5m.drawAppMenu(F("AudioPlayer"), F("VOL-"), F("EXIT"), F("VOL+"));
 }
 
-Mp3PlayerClass::~Mp3PlayerClass()
+AudioPlayerClass::~AudioPlayerClass()
 {
     M5m.drawAppMenu(F("SD BROWSER"), F("EXIT"), F("OPEN"), F(">"));
     M5m.showList();
